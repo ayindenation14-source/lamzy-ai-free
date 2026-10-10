@@ -1,0 +1,40 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lamzy AI</title>
+<style>
+body{margin:0;background:#101126;color:white;font-family:Arial,sans-serif;text-align:center}
+header{background:#191a35;padding:25px;color:#a78bfa;font-size:28px;font-weight:bold}
+main{padding:35px 20px}
+h1{font-size:32px}
+p{color:#c7c8df}
+.chat{max-width:500px;margin:30px auto}
+input{width:65%;padding:15px;border:0;border-radius:10px}
+button{padding:15px;background:#8b5cf6;color:white;border:0;border-radius:10px;cursor:pointer}
+#answer{background:#191a35;padding:20px;border-radius:12px;margin-top:20px}
+footer{padding:20px;color:#999}
+</style>
+</head>
+<body>
+<header>✦ LAMZY AI</header>
+<main>
+<h1>Your AI Assistant</h1>
+<p>Welcome to Lamzy AI! Ask a question or explore an idea.</p>
+<div class="chat">
+<input id="question" placeholder="Type your question...">
+<button onclick="ask()">Send</button>
+<div id="answer">Welcome! Your Lamzy AI website is ready.</div>
+</div>
+</main>
+<footer>© 2026 Lamzy AI</footer>
+<script>
+function ask(){
+let q=document.getElementById('question').value.trim();
+if(!q)return;
+document.getElementById('answer').textContent=
+'Thanks for trying Lamzy AI! The AI answering service has not been connected yet. Your question was: '+q;
+}
+</script>
+</body>
+</html>
