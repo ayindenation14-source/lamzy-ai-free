@@ -1,40 +1,91 @@
 <!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101126">
 <title>Lamzy AI</title>
 <style>
-body{margin:0;background:#101126;color:white;font-family:Arial,sans-serif;text-align:center}
-header{background:#191a35;padding:25px;color:#a78bfa;font-size:28px;font-weight:bold}
-main{padding:35px 20px}
-h1{font-size:32px}
-p{color:#c7c8df}
-.chat{max-width:500px;margin:30px auto}
-input{width:65%;padding:15px;border:0;border-radius:10px}
-button{padding:15px;background:#8b5cf6;color:white;border:0;border-radius:10px;cursor:pointer}
-#answer{background:#191a35;padding:20px;border-radius:12px;margin-top:20px}
-footer{padding:20px;color:#999}
+:root{color-scheme:dark;--bg:#101126;--panel:#191a35;--accent:#a78bfa;--text:#f7f7ff;--muted:#c7c8df}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--panel);padding:18px 20px;color:var(--accent);font-size:24px;font-weight:800;letter-spacing:1px;border-bottom:1px solid #2b2c50}
+main{width:min(760px,100%);margin:auto;padding:28px 16px;flex:1}
+h1{font-size:clamp(28px,5vw,42px);margin:8px 0}
+p{color:var(--muted);line-height:1.6}
+.intro{text-align:center;margin:24px 0 30px}
+.chat{background:var(--panel);border:1px solid #303153;border-radius:18px;padding:16px;box-shadow:0 12px 35px #0002}
+#answer{white-space:pre-wrap;overflow-wrap:anywhere;min-height:100px;max-height:52vh;overflow:auto;text-align:left;line-height:1.65;padding:16px;border-radius:12px;background:#111229;margin-bottom:14px;color:#f2f1ff}
+form{display:flex;gap:9px}
+input{min-width:0;flex:1;padding:14px;border:1px solid #42436b;border-radius:11px;background:#101126;color:white;font:inherit}
+button{padding:13px 18px;background:#8b5cf6;color:white;border:0;border-radius:11px;font:inherit;font-weight:700;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+.hint{font-size:12px;text-align:center;color:#9b9cbd;margin:12px 0 0}
+footer{text-align:center;padding:18px;color:#999;font-size:13px}
 </style>
 </head>
 <body>
 <header>✦ LAMZY AI</header>
 <main>
+<section class="intro">
 <h1>Your AI Assistant</h1>
-<p>Welcome to Lamzy AI! Ask a question or explore an idea.</p>
-<div class="chat">
-<input id="question" placeholder="Type your question...">
-<button onclick="ask()">Send</button>
-<div id="answer">Welcome! Your Lamzy AI website is ready.</div>
-</div>
+<p>Ask questions, learn something new, or explore an idea.</p>
+</section>
+<section class="chat" aria-label="Lamzy AI chat">
+<div id="answer" role="status" aria-live="polite">Hi! I'm Lamzy AI. Ask me anything to get started.</div>
+<form id="chatForm">
+<input id="question" autocomplete="off" placeholder="Message Lamzy AI..." aria-label="Your question" required>
+<button id="send" type="submit">Send</button>
+</form>
+<p class="hint">Please don't enter passwords or private information.</p>
+</section>
 </main>
 <footer>© 2026 Lamzy AI</footer>
 <script>
-function ask(){
-let q=document.getElementById('question').value.trim();
-if(!q)return;
-document.getElementById('answer').textContent=
-'Thanks for trying Lamzy AI! The AI answering service has not been connected yet. Your question was: '+q;
+const form=document.getElementById('chatForm');
+const input=document.getElementById('question');
+const answer=document.getElementById('answer');
+const send=document.getElementById('send');
+const history=[];form.addEventListener('submit',async event=>{
+event.preventDefault();
+const question=input.value.trim();
+if(!question)return;
+
+history.push({role:'user',content:question});
+answer.textContent='Lamzy AI is thinking…';
+input.value='';
+send.disabled=true;
+send.textContent='Thinking…';
+
+try{
+const response=await fetch('/.netlify/functions/chat',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({messages:history.slice(-12)})
+});
+
+const data=await response.json().catch(()=>({}));
+
+if(!response.ok){
+  throw new Error(data.error||'The AI service is not configured yet.');
 }
+
+if(!data.reply){
+  throw new Error('Lamzy AI did not receive a response. Please try again.');
+}
+
+history.push({role:'assistant',content:data.reply});
+answer.textContent=data.reply;
+
+}catch(error){
+history.pop();
+answer.textContent='Sorry, Lamzy AI could not answer just now. '+(error.message||'Please try again later.');
+}finally{
+send.disabled=false;
+send.textContent='Send';
+input.focus();
+}
+});
 </script>
+
 </body>
 </html>
